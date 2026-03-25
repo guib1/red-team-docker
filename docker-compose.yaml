@@ -25,9 +25,6 @@ services:
       # Persistência das configurações (API Keys, preferências do Gemini-CLI)
       # No Linux/Mac, o Gemini-CLI costuma salvar em ~/.config/
       - ./config/gemini-cli:/root/.config/gemini-terminator
-      
-      # Mapeie seu arquivo de VPN do THM para dentro do container
-      - ./access_thm.ovpn:/root/thm.ovpn:ro
 
     environment:
       - TERM=xterm-256color # Garante que as cores do terminal funcionem bem
