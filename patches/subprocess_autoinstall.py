@@ -31,7 +31,11 @@ def _ensure_installed(command):
     if shutil.which(command):
         return
 
-    print(f"[*] HexStrike Auto-Install: '{command}' não encontrado. Iniciando busca de pacote...", file=sys.stderr)
+    # Evita recursão se o comando for apt-get ou apt-file
+    if command in ['apt-get', 'apt-file', 'apt']:
+        return
+
+    print(f"[*] HexStrike Auto-Install: '{command}' não encontrado. Iniciando busca...", file=sys.stderr)
     
     pkg_name = CMD_TO_PKG.get(command, command)
     
@@ -39,50 +43,59 @@ def _ensure_installed(command):
         env = os.environ.copy()
         env["DEBIAN_FRONTEND"] = "noninteractive"
         
-        # 1. Tenta instalar o nome provável do pacote
-        print(f"[*] Tentando instalar pacote: {pkg_name}", file=sys.stderr)
+        # 1. Tenta instalar o pacote
         proc = _original_run(["apt-get", "install", "-y", pkg_name], env=env, capture_output=True)
         
         if proc.returncode == 0:
             print(f"[+] '{command}' instalado com sucesso.", file=sys.stderr)
             return
 
-        # 2. Se falhar, tenta atualizar e procurar via apt-file (se disponível) ou apenas update
-        print(f"[*] Falha inicial. Atualizando repositórios...", file=sys.stderr)
-        _original_run(["apt-get", "update"], env=env, stdout=subprocess.DEVNULL)
+        # 2. Se falhar, tenta atualizar e procurar via apt-file
+        _original_run(["apt-get", "update"], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
         proc = _original_run(["apt-get", "install", "-y", pkg_name], env=env, capture_output=True)
         if proc.returncode == 0:
             print(f"[+] '{command}' instalado após update.", file=sys.stderr)
         else:
-            # 3. Tenta usar apt-file para encontrar o pacote correto
-            print(f"[*] Procurando qual pacote fornece '{command}' via apt-file...", file=sys.stderr)
+            # 3. Tenta usar apt-file
             search = _original_run(["apt-file", "search", f"bin/{command}"], capture_output=True, text=True)
             if search.stdout:
                 possible_pkgs = [line.split(':')[0] for line in search.stdout.split('\n') if line]
                 if possible_pkgs:
-                    print(f"[-] Falha ao instalar automaticamente. Sugestão para a IA: O comando '{command}' pode ser encontrado nos pacotes: {', '.join(set(possible_pkgs[:3]))}. Tente 'apt-get install [pacote]'.", file=sys.stderr)
+                    print(f"[-] Comando '{command}' pode estar nos pacotes: {', '.join(set(possible_pkgs[:3]))}", file=sys.stderr)
             else:
-                print(f"[-] Erro: Comando '{command}' não encontrado nos repositórios Debian.", file=sys.stderr)
-                print(f"[*] Sugestão para a IA: Verifique repositórios externos ou instale manualmente via 'git clone'.", file=sys.stderr)
-                print(f"[*] Repositórios Úteis: \n - Kali Packages: https://pkg.kali.org/pkg/{command} \n - GitHub: https://github.com/search?q={command}+tool \n - Exploit-DB: https://www.exploit-db.com/", file=sys.stderr)
+                print(f"[-] Erro: '{command}' não encontrado nos repositórios.", file=sys.stderr)
+                print(f"[*] Verifique: https://pkg.kali.org/pkg/{command}", file=sys.stderr)
 
     except Exception as e:
-        print(f"[-] Erro crítico no auto-install: {e}", file=sys.stderr)
+        # Silencioso para não quebrar o fluxo principal
+        pass
+
+def _extract_command(args):
+    """Extrai o comando de forma segura."""
+    if isinstance(args, list) and len(args) > 0:
+        return args[0]
+    if isinstance(args, str):
+        return args.split()[0]
+    return None
 
 def patched_run(*args, **kwargs):
-    args_list = list(args)
-    cmd_args = args_list[0] if args_list else kwargs.get('args')
-    
-    if isinstance(cmd_args, list) and len(cmd_args) > 0:
-        _ensure_installed(cmd_args[0])
-    elif isinstance(cmd_args, str) and not kwargs.get('shell'):
-        _ensure_installed(cmd_args)
-    
+    cmd_args = args[0] if args else kwargs.get('args')
+    cmd = _extract_command(cmd_args)
+    if cmd: _ensure_installed(cmd)
     return _original_run(*args, **kwargs)
 
-# Aplicando Patch no módulo subprocess
-subprocess.run = patched_run
-subprocess.Popen = lambda *a, **k: (_ensure_installed(a[0][0] if isinstance(a[0], list) else a[0]), _original_Popen(*a, **k))[1]
+# Patch via Classe para manter compatibilidade com Type Hinting (Subscriptable Popen)
+class PatchedPopen(subprocess.Popen):
+    def __init__(self, *args, **kwargs):
+        cmd_args = args[0] if args else kwargs.get('args')
+        cmd = _extract_command(cmd_args)
+        if cmd: _ensure_installed(cmd)
+        super().__init__(*args, **kwargs)
 
-print("[*] HexStrike Subprocess Patch Ativado.", file=sys.stderr)
+# Aplicando Patches
+subprocess.run = patched_run
+subprocess.Popen = PatchedPopen
+subprocess.call = lambda *a, **k: (_ensure_installed(_extract_command(a[0] if a else k.get('args'))), _original_run(*a, **k).returncode)[1]
+
+print("[*] HexStrike Subprocess Patch Ativado (Class-Based).", file=sys.stderr)

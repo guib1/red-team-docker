@@ -12,7 +12,7 @@ if [ ! -f "$SETTINGS_FILE" ]; then
 {
   "mcpServers": {
     "hexstrike": {
-      "command": "python3",
+      "command": "/usr/bin/python3",
       "args": [
         "/opt/hexstrike/hexstrike_mcp.py"
       ]
@@ -47,8 +47,17 @@ mkdir -p /root/.gemini
 
 # Inicia o servidor HTTP do HexStrike em uma sessão detached do Screen
 echo "[*] Iniciando HexStrike Server em background (screen)..."
+# Remove sessões antigas se houver
+screen -wipe > /dev/null 2>&1 || true
 screen -dmS hexstrike python3 /opt/hexstrike/hexstrike_server.py
-sleep 5
+
+# Aguarda o servidor estabilizar
+echo "[*] Aguardando inicialização dos serviços (10s)..."
+sleep 10
+
+# Garante que o terminal está em modo estável antes de entregar o bash
+stty sane || true
+echo "[+] Ambiente pronto! Se o teclado travar, tente apertar 'Enter' ou reinicie o terminal."
 
 # Inicia o bash para interatividade
 exec /bin/bash
