@@ -56,9 +56,6 @@ To enter the container:
 docker exec -it hexstrike_gemini_lab /bin/bash
 ```
 
-### DEMO
-[![asciicast](https://asciinema.org/a/g9iQhrANovsVpQAm.svg)](https://asciinema.org/a/g9iQhrANovsVpQAm)
-
 #### Authenticating Gemini
 Run:
 ```bash
@@ -68,6 +65,9 @@ gemini
 > **Docker Note:** On the first run, after setting up your account, the keyboard might stop responding. Simply exit the container (`exit` or `Ctrl+D`) and enter again.
 
 ---
+
+### DEMO
+[![asciicast](https://asciinema.org/a/g9iQhrANovsVpQAm.svg)](https://asciinema.org/a/g9iQhrANovsVpQAm)
 
 > [!CAUTION]
 > **Aviso Legal / Legal Disclaimer:** Este ambiente foi criado estritamente para fins educacionais. / This environment was created strictly for educational purposes.
