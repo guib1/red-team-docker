@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     openvpn \
     iputils-ping \
     screen \
+    apt-file \
+    && apt-file update \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
@@ -25,6 +27,11 @@ RUN npm install -g @google/gemini-cli
 # 3. Instalação do HexStrike (Corrigido para evitar erro de 'git not found')
 WORKDIR /opt
 RUN git clone --depth 1 https://github.com/0x4m4/hexstrike-ai.git /opt/hexstrike
+
+# Injeta o patch de auto-instalação
+COPY patches/subprocess_autoinstall.py /opt/hexstrike/subprocess_autoinstall.py
+RUN sed -i '1i import sys; sys.path.append("/opt/hexstrike"); import subprocess_autoinstall' /opt/hexstrike/hexstrike_mcp.py && \
+    sed -i '1i import sys; sys.path.append("/opt/hexstrike"); import subprocess_autoinstall' /opt/hexstrike/HexStrike.py
 
 WORKDIR /opt/hexstrike
 RUN sed -i '/angr/d' requirements.txt && \
