@@ -43,9 +43,13 @@ RUN sed -i '/angr/d' requirements.txt && \
     sed -i '/bcrypt==4.0.1/d' requirements.txt && \
     pip3 install -r requirements.txt --break-system-packages
 
-# 4. Copia os scripts para o binário
+# 4. Copia os scripts para o binário e skills do gemini
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Pré-instalação das skills solicitadas
+COPY .agents /root/.agents
+COPY skills-lock.json /root/skills-lock.json
 
 WORKDIR /root/pentest
 

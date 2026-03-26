@@ -1,15 +1,25 @@
 {
   "version": 1,
   "skills": {
-    "docker-expert": {
-      "source": "sickn33/antigravity-awesome-skills",
-      "sourceType": "github",
-      "computedHash": "51defa57449d1e7a3e51ae6444c111c4424cd47ed1fb96a3eb1dba0c17971c0d"
-    },
     "red-team-tactics": {
       "source": "sickn33/antigravity-awesome-skills",
       "sourceType": "github",
       "computedHash": "f0e67cec1fdad3f91dd3587d2048e3117c3d296bcf8789121bf641978a749d2c"
+    },
+    "pentest-checklist": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "computedHash": "local-manual-install"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "computedHash": "local-manual-install"
+    },
+    "tdd": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "computedHash": "local-manual-install"
     }
   }
 }
