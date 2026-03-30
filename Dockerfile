@@ -45,7 +45,8 @@ RUN sed -i '/angr/d' requirements.txt && \
 
 # 4. Copia os scripts para o binário e skills do gemini
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh && \
+    sed -i 's/\r$//' /usr/local/bin/entrypoint.sh
 
 # Pré-instalação das skills solicitadas
 COPY .agents /root/.agents
@@ -64,8 +65,6 @@ RUN echo 'echo -e "\n\033[1;31m========================================\033[0m"'
     echo 'echo -e "\033[1;31m[!] Caso aconteça, saia e entre novamente (Ctrl+D / docker exec).\033[0m"' >> /root/.bashrc && \
     echo 'echo -e "\033[1;31m[!] If it happens, exit and enter again (Ctrl+D / docker exec).\033[0m"' >> /root/.bashrc && \
     echo 'echo -e "\033[1;34m[*] HexStrike MCP Server: \033[1;33mAtivado/Active\033[0m"' >> /root/.bashrc && \
-
-
     echo 'echo -e "\033[1;34m[*] Para ver o console do servidor, digite: \033[1;33mscreen -r hexstrike\n\033[0m"' >> /root/.bashrc
 
 CMD ["/usr/local/bin/entrypoint.sh"]
