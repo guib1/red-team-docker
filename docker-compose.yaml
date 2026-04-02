@@ -29,3 +29,31 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY:-} # Pode ser passada via arquivo .env
 
     working_dir: /root/pentest
+
+  files:
+    image: filebrowser/filebrowser
+    container_name: hexstrike_files
+    ports:
+      - "8081:80"
+    volumes:
+      - ./workdir:/srv
+
+  terminal:
+    image: docker:cli
+    container_name: hexstrike_terminal
+    ports:
+      - "7681:7681"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: sh -c
+    command: >
+      "apk add --no-cache ttyd &&
+      ttyd -p 7681 docker exec -it hexstrike_gemini_lab /bin/bash -i"
+
+  gui:
+    build: ./gui
+    container_name: hexstrike_gui
+    ports:
+      - "6080:6080"
+    volumes:
+      - ./workdir:/workspace
