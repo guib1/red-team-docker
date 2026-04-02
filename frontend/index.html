@@ -1,13 +1,121 @@
 <!DOCTYPE html>
-<html>
-  <body style="margin:0; display:flex; height:100vh;">
-    
-    <iframe src="http://localhost:6080/vnc.html" style="flex:2;"></iframe>
-    
-    <div style="flex:1; display:flex; flex-direction:column;">
-      <iframe src="http://localhost:7681" style="flex:1;"></iframe>
-      <iframe src="http://localhost:8081" style="flex:1;"></iframe>
-    </div>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PENTEST HUB // V1.0</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Matrix rain canvas -->
+    <canvas id="matrix"></canvas>
 
-  </body>
+    <header>
+        <div class="logo glitch" data-text="HEXSTRIKE_AI">HEXSTRIKE_AI</div>
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="blink"></span>
+                <span>SYSTEM: ONLINE</span>
+            </div>
+            <div class="status-item" id="clock">
+                CLOCK: 00:00:00
+            </div>
+            <div class="status-item">
+                NODE: RED_TEAM_ALPHA
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Panel 1: Main GUI (VNC) -->
+        <div class="panel panel-vnc">
+            <div class="panel-header">
+                <span>Pentest GUI // Desktop</span>
+                <span>ID: GUI-01</span>
+            </div>
+            <div class="panel-content">
+                <iframe src="http://localhost:6080/vnc.html"></iframe>
+            </div>
+            <div class="scanline"></div>
+        </div>
+
+        <!-- Panel 2: Terminal -->
+        <div class="panel">
+            <div class="panel-header">
+                <span>Secure Terminal // TTYD</span>
+                <span>ID: TERM-01</span>
+            </div>
+            <div class="panel-content">
+                <iframe src="http://localhost:7681"></iframe>
+            </div>
+        </div>
+
+        <!-- Panel 3: File System -->
+        <div class="panel">
+            <div class="panel-header">
+                <span>Data Bridge // Files</span>
+                <span>ID: DATA-01</span>
+            </div>
+            <div class="panel-content">
+                <iframe src="http://localhost:8081"></iframe>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Matrix Digital Rain ---
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#ff3131'; // Red Color
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 35);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // --- Clock Update ---
+        function updateClock() {
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0];
+            document.getElementById('clock').innerText = 'CLOCK: ' + time;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
 </html>
