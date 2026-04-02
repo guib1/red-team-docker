@@ -155,6 +155,15 @@
         }
         setInterval(updateUI, 1000);
 
+        // --- Focus Fix for Terminal Iframes ---
+        // Ensures that clicking the terminal panel focuses the iframe for typing
+        document.querySelectorAll('.panel').forEach(panel => {
+            panel.addEventListener('mousedown', () => {
+                const iframe = panel.querySelector('iframe');
+                if (iframe) iframe.focus();
+            });
+        });
+
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;

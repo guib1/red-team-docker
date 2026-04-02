@@ -9,7 +9,6 @@ services:
     # Privilégios elevados para scans de rede (Nmap, etc)
     privileged: true
     
-    # Modo host permite alcançar as máquinas do TryHackMe via sua VPN local
     network_mode: host
     
     # Garante interatividade para o comando gemini-cli

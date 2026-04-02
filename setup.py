@@ -88,6 +88,19 @@ def complete_install():
             f.write(f"Setup completed at {time.ctime()}\n")
         
         print("[+] Success! All services are up.")
+        
+        # --- NEW TTYD INTEGRATION ---
+        print("[*] Configuring TTYD terminal on hexstrike-ai container...")
+        # Downloading official ttyd x86_64 binary as it is not in default repos
+        run_command("docker exec hexstrike_gemini_lab curl -fsSL https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 -o /usr/local/bin/ttyd", shell=True)
+        run_command("docker exec hexstrike_gemini_lab chmod +x /usr/local/bin/ttyd", shell=True)
+        
+        # Start TTYD in detached mode on port 7681 (exposed via docker-compose ports)
+        print("[+] Starting TTYD terminal on http://localhost:7681...")
+        # Adding --writable to ensure terminal accepts input correctly
+        run_command("docker exec -d hexstrike_gemini_lab ttyd --writable -p 7681 /bin/bash", shell=True)
+        # ----------------------------
+
         print("[*] Opening frontend dashboard...")
 
         time.sleep(5)
