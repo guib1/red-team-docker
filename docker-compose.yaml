@@ -10,6 +10,8 @@ services:
     privileged: true
     
     network_mode: host
+    # ports:
+      # - "7681:7681"
     
     # Garante interatividade para o comando gemini-cli
     stdin_open: true
@@ -32,7 +34,7 @@ services:
   files:
     image: filebrowser/filebrowser
     container_name: hexstrike_files
-    ports:
+    # ports:
       - "8081:80"
     volumes:
       - ./workdir:/srv
@@ -41,7 +43,7 @@ services:
   gui:
     build: ./gui
     container_name: hexstrike_gui
-    ports:
+    # ports:
       - "6080:6080"
     volumes:
       - ./workdir:/workspace

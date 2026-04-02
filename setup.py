@@ -43,6 +43,37 @@ def check_setup_done():
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+def reconfigure_docker_compose(is_simple):
+    """Dynamically updates network settings in docker-compose.yaml."""
+    print(f"[*] Reconfiguring docker-compose.yaml for {'Simple' if is_simple else 'Complete'} mode...")
+    
+    try:
+        with open("docker-compose.yaml", "r") as f:
+            content = f.read()
+        
+        # Simple mode: Enable network_mode: host, Comment out ports
+        if is_simple:
+            content = content.replace("# network_mode: host", "network_mode: host")
+            # If it's already active, we don't want to double comment or comment out existing uncommented ports 
+            # if we are already in simple mode. 
+            # But let's assume the user starts from a known state or we just make it idempotent.
+            if '    ports:' in content and '    # ports:' not in content:
+                 content = content.replace("    ports:", "    # ports:")
+                 content = content.replace('      - "7681:7681"', '      # - "7681:7681"')
+        else:
+            # Complete mode: Comment out network_mode: host, Enable ports
+            content = content.replace("    network_mode: host", "    # network_mode: host")
+            content = content.replace("    # ports:", "    ports:")
+            content = content.replace('      # - "7681:7681"', '      - "7681:7681"')
+            
+        with open("docker-compose.yaml", "w") as f:
+            f.write(content)
+        print("[+] docker-compose.yaml updated successfully.")
+        return True
+    except Exception as e:
+        print(f"[!] Error reconfiguring docker-compose.yaml: {e}")
+        return False
+
 def main_menu():
     clear_screen()
     print("========================================")
@@ -63,6 +94,7 @@ def main_menu():
 
 def simple_install():
     print("\n[*] Starting Simple Install...")
+    reconfigure_docker_compose(True)
     print("[*] Building and starting hexstrike-ai container...")
     if run_command("docker compose up -d --build hexstrike-ai", shell=True):
         with open(MARKER_FILE, "w") as f:
@@ -82,6 +114,7 @@ def simple_install():
 
 def complete_install():
     print("\n[*] Starting Complete Install...")
+    reconfigure_docker_compose(False)
     print("[*] Deploying all docker-compose services...")
     if run_command("docker compose up -d --build", shell=True):
         with open(MARKER_FILE, "w") as f:
