@@ -9,9 +9,9 @@ services:
     # Privilégios elevados para scans de rede (Nmap, etc)
     privileged: true
     
+    # Host network: container sees the SAME network as your machine (VPN, WireGuard, etc.)
+    # ttyd is served by a separate sidecar container with its own port mapping.
     network_mode: host
-    # ports:
-      # - "7681:7681"
     
     # Garante interatividade para o comando gemini-cli
     stdin_open: true
@@ -31,10 +31,22 @@ services:
 
     working_dir: /root/pentest
 
+  # Web terminal sidecar: ttyd with port mapping, shells into hexstrike via docker exec
+  hexstrike-ttyd:
+    build: ./ttyd
+    container_name: hexstrike_ttyd
+    ports:
+      - "7681:7681"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - hexstrike-ai
+    restart: unless-stopped
+
   files:
     image: filebrowser/filebrowser
     container_name: hexstrike_files
-    # ports:
+    ports:
       - "8081:80"
     volumes:
       - ./workdir:/srv
@@ -43,7 +55,7 @@ services:
   gui:
     build: ./gui
     container_name: hexstrike_gui
-    # ports:
+    ports:
       - "6080:6080"
     volumes:
       - ./workdir:/workspace

@@ -43,36 +43,7 @@ def check_setup_done():
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def reconfigure_docker_compose(is_simple):
-    """Dynamically updates network settings in docker-compose.yaml."""
-    print(f"[*] Reconfiguring docker-compose.yaml for {'Simple' if is_simple else 'Complete'} mode...")
-    
-    try:
-        with open("docker-compose.yaml", "r") as f:
-            content = f.read()
-        
-        # Simple mode: Enable network_mode: host, Comment out ports
-        if is_simple:
-            content = content.replace("# network_mode: host", "network_mode: host")
-            # If it's already active, we don't want to double comment or comment out existing uncommented ports 
-            # if we are already in simple mode. 
-            # But let's assume the user starts from a known state or we just make it idempotent.
-            if '    ports:' in content and '    # ports:' not in content:
-                 content = content.replace("    ports:", "    # ports:")
-                 content = content.replace('      - "7681:7681"', '      # - "7681:7681"')
-        else:
-            # Complete mode: Comment out network_mode: host, Enable ports
-            content = content.replace("    network_mode: host", "    # network_mode: host")
-            content = content.replace("    # ports:", "    ports:")
-            content = content.replace('      # - "7681:7681"', '      - "7681:7681"')
-            
-        with open("docker-compose.yaml", "w") as f:
-            f.write(content)
-        print("[+] docker-compose.yaml updated successfully.")
-        return True
-    except Exception as e:
-        print(f"[!] Error reconfiguring docker-compose.yaml: {e}")
-        return False
+
 
 def main_menu():
     clear_screen()
@@ -94,7 +65,6 @@ def main_menu():
 
 def simple_install():
     print("\n[*] Starting Simple Install...")
-    reconfigure_docker_compose(True)
     print("[*] Building and starting hexstrike-ai container...")
     if run_command("docker compose up -d --build hexstrike-ai", shell=True):
         with open(MARKER_FILE, "w") as f:
@@ -114,25 +84,14 @@ def simple_install():
 
 def complete_install():
     print("\n[*] Starting Complete Install...")
-    reconfigure_docker_compose(False)
-    print("[*] Deploying all docker-compose services...")
+    print("[*] Deploying all docker-compose services (including TTYD sidecar)...")
     if run_command("docker compose up -d --build", shell=True):
         with open(MARKER_FILE, "w") as f:
             f.write(f"Setup completed at {time.ctime()}\n")
         
         print("[+] Success! All services are up.")
-        
-        # --- NEW TTYD INTEGRATION ---
-        print("[*] Configuring TTYD terminal on hexstrike-ai container...")
-        # Downloading official ttyd x86_64 binary as it is not in default repos
-        run_command("docker exec hexstrike_gemini_lab curl -fsSL https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 -o /usr/local/bin/ttyd", shell=True)
-        run_command("docker exec hexstrike_gemini_lab chmod +x /usr/local/bin/ttyd", shell=True)
-        
-        # Start TTYD in detached mode on port 7681 (exposed via docker-compose ports)
-        print("[+] Starting TTYD terminal on http://localhost:7681...")
-        # Adding --writable to ensure terminal accepts input correctly
-        run_command("docker exec -d hexstrike_gemini_lab ttyd --writable -p 7681 /bin/bash", shell=True)
-        # ----------------------------
+        print("[+] TTYD terminal available at http://localhost:7681")
+        print("[+] Your host network (VPN, WireGuard, etc.) is shared with the lab.")
 
         print("[*] Opening frontend dashboard...")
 
@@ -140,7 +99,6 @@ def complete_install():
         
         frontend_path = os.path.abspath("frontend/index.html")
         if os.path.exists(frontend_path):
-            # Using webbrowser to open the local file
             webbrowser.open(f"file://{frontend_path}")
         else:
             print(f"[!] Warning: Frontend file not found at {frontend_path}")
