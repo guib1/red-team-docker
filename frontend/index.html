@@ -84,23 +84,23 @@
                             <span>ID: CTRL-01</span>
                         </div>
                         <div class="panel-content">
-                            <!-- New Row: Individual Instance Loads -->
-                            <div class="node-stats-container" id="node-list">
-                                <!-- Populated via JS -->
-                                <div class="node-loading">INITIALIZING DATA BRIDGE...</div>
-                            </div>
-                            
-                            <!-- Main Aggregate Cards -->
+                            <!-- Main Aggregate Cards with nested lists -->
                             <div class="stats-monitor">
                                 <div class="stat-card">
                                     <span class="stat-label">AGGREGATE CPU</span>
                                     <div class="stat-value" id="cpu-val">0%</div>
                                     <div class="stat-bar"><div class="stat-level" id="cpu-bar" style="width: 0%;"></div></div>
+                                    <div class="mini-list" id="cpu-list">
+                                        <!-- CPU-specific node stats go here -->
+                                    </div>
                                 </div>
                                 <div class="stat-card">
                                     <span class="stat-label">MEMORY USAGE</span>
                                     <div class="stat-value" id="mem-val">0 / 0 GB</div>
                                     <div class="stat-bar"><div class="stat-level" id="mem-bar" style="width: 0%;"></div></div>
+                                    <div class="mini-list" id="mem-list">
+                                        <!-- Memory-specific node stats go here -->
+                                    </div>
                                 </div>
                                 <div class="stat-card">
                                     <span class="stat-label">NET RX (IN)</span>
@@ -168,24 +168,24 @@
                 document.getElementById('net-val').innerText = data.aggregate.net_out_mb + ' MB';
                 document.getElementById('net-bar').style.width = Math.min(data.aggregate.net_out_mb / 10, 100) + '%';
 
-                // 2. Update Individual Node List
-                const nodeList = document.getElementById('node-list');
-                nodeList.innerHTML = data.individual.map(node => `
-                    <div class="node-row">
-                        <span class="node-status ${node.status}">${node.status}</span>
-                        <span class="node-name">${node.name}</span>
-                        <div class="node-metrics">
-                            <span class="mini-stat">CPU: ${node.cpu}%</span>
-                            <div class="mini-bar"><div class="mini-level" style="width: ${node.cpu}%"></div></div>
-                            <span class="mini-stat">MEM: ${node.mem}%</span>
-                            <div class="mini-bar"><div class="mini-level" style="width: ${node.mem}%"></div></div>
-                        </div>
+                // 2. Update CPU Card Individual List
+                document.getElementById('cpu-list').innerHTML = data.individual.map(node => `
+                    <div class="mini-node-row">
+                        <span class="mini-node-name">${node.name}</span>
+                        <span class="mini-node-val">${node.cpu}%</span>
+                    </div>
+                `).join('');
+
+                // 3. Update Memory Card Individual List
+                document.getElementById('mem-list').innerHTML = data.individual.map(node => `
+                    <div class="mini-node-row">
+                        <span class="mini-node-name">${node.name}</span>
+                        <span class="mini-node-val">${node.mem}% (${node.mem_mb}MB)</span>
                     </div>
                 `).join('');
 
             } catch (err) {
                 console.error("Stats Fetch Error:", err);
-                document.getElementById('node-list').innerHTML = `<div class="node-error">ERROR: DATA BRIDGE OFFLINE [8082]</div>`;
             }
         }
 

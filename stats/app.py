@@ -81,6 +81,7 @@ def get_stats():
                 "name": container.name.replace('hexstrike_', '').replace('_', ' ').upper(),
                 "cpu": round(cpu_percent, 1),
                 "mem": round((mem_usage / mem_limit) * 100, 1) if mem_limit > 0 else 0,
+                "mem_mb": round(mem_usage / (1024**2), 1),
                 "status": container.status
             })
             
