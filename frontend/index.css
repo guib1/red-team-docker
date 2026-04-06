@@ -102,6 +102,27 @@ header {
     50% { opacity: 0.3; }
 }
 
+/* Header Button */
+.terminal-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 4px 12px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.3s;
+    margin-left: 20px;
+}
+
+.terminal-btn:hover {
+    background: var(--accent);
+    color: black;
+    box-shadow: 0 0 15px var(--accent);
+}
+
 /* Panels */
 .panel {
     background: var(--panel-bg);

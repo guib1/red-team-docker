@@ -17,8 +17,9 @@
                 <span class="blink"></span>
                 <span>SYSTEM: ONLINE</span>
             </div>
-            <div class="status-item" id="clock">CLOCK: 00:00:00</div>
+            <div class="status-item" id="clock">CLOCK: 08:30:45</div>
             <div class="status-item">NODE: RED_TEAM_ALPHA</div>
+            <button class="terminal-btn" onclick="openTerminal()">Open Terminal</button>
         </div>
     </header>
 
@@ -192,6 +193,10 @@
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = 'CLOCK: ' + now.toTimeString().split(' ')[0];
+        }
+
+        function openTerminal() {
+            window.open('http://localhost:7681', 'PentestTerminal', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes');
         }
 
         setInterval(updateStats, 2000); // Fetch every 2s
