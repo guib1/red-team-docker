@@ -1,0 +1,308 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+:root {
+    --accent: #ff3131;
+    --accent-glow: rgba(255, 49, 49, 0.5);
+    --bg-dark: #050505;
+    --panel-bg: rgba(15, 5, 5, 0.75);
+    --border-color: rgba(255, 49, 49, 0.3);
+    --font-main: 'Share Tech Mono', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--accent);
+    font-family: var(--font-main);
+    overflow: hidden; /* Manage scrolling via container */
+}
+
+/* Scroll Snap Container */
+.scroll-container {
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+}
+
+.section {
+    height: 100vh;
+    width: 100vw;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    padding-top: 60px; /* Space for fixed header */
+    padding-bottom: 20px;
+}
+
+/* Matrix Canvas Background */
+#matrix {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.2;
+}
+
+/* Fixed Header */
+header {
+    height: 60px;
+    width: 100%;
+    background: linear-gradient(180deg, rgba(255, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    position: fixed;
+    top: 0;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px var(--accent);
+}
+
+.status-bar {
+    display: flex;
+    gap: 2rem;
+    font-size: 0.9rem;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.blink {
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    animation: blink 1s infinite;
+    box-shadow: 0 0 8px var(--accent);
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* Header Button */
+.terminal-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 4px 12px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.3s;
+    margin-left: 20px;
+}
+
+.terminal-btn:hover {
+    background: var(--accent);
+    color: black;
+    box-shadow: 0 0 15px var(--accent);
+}
+
+/* Panels */
+.panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+}
+
+.panel:hover {
+    border-color: var(--accent);
+}
+
+.panel-header {
+    height: 30px;
+    background: rgba(255, 0, 0, 0.05);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    justify-content: space-between;
+}
+
+.panel-content {
+    flex: 1;
+    width: 100%;
+}
+
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+}
+
+/* SECTION 1: Operação Alpha */
+.grid-sec1 {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    padding: 15px;
+}
+
+/* SECTION 2: Command Center */
+.grid-sec2 {
+    flex: 1;
+    display: grid;
+    grid-template-rows: 1.5fr 1fr;
+    gap: 15px;
+    padding: 15px;
+}
+
+.terminals-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.monitor-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    height: 100%;
+}
+
+/* Stats Monitor UI */
+.stats-monitor {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 20px;
+    height: 100%;
+}
+
+.stat-card {
+    border-left: 2px solid var(--accent);
+    padding-left: 15px;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.stat-bar {
+    height: 4px;
+    background: rgba(255, 49, 49, 0.1);
+    margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-level {
+    height: 100%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    width: 60%;
+}
+
+.stat-level {
+    height: 100%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    width: 60%;
+}
+
+/* Integrated Card Lists */
+.mini-list {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid rgba(255, 49, 49, 0.1);
+    padding-top: 10px;
+}
+
+.mini-node-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.mini-node-name {
+    text-transform: uppercase;
+}
+
+.mini-node-val {
+    color: var(--accent);
+    font-weight: bold;
+}
+
+/* Decorations */
+.scanline {
+    width: 100%;
+    height: 100px;
+    z-index: 5;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(255, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0) 100%);
+    opacity: 0.1;
+    position: absolute;
+    bottom: 100%;
+    animation: scanline 6s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes scanline {
+    0% { bottom: 100%; }
+    100% { bottom: -100px; }
+}
+
+.glitch {
+    position: relative;
+}
+
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 2px;
+    text-shadow: -1px 0 red;
+    top: 0;
+    color: white;
+    background: black;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+    animation: noise-anim 2s infinite linear alternate-reverse;
+}
+
+@keyframes noise-anim {
+    0% { clip: rect(10px, 9999px, 80px, 0); }
+    100% { clip: rect(40px, 9999px, 30px, 0); }
+}

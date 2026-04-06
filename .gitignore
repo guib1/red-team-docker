@@ -15,8 +15,8 @@ venv.bak/
 # Project specific
 workdir/*
 !workdir/.gitkeep
-config/gemini-cli/*
-!config/gemini-cli/.gitkeep
+!workdir/example-prompt.md
+!workdir/tools.md
 
 # Sensitive VPN files
 *.ovpn
@@ -37,3 +37,4 @@ yarn-error.log*
 
 # Docker
 .docker/
+.setup_done

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PENTEST HUB // V2.0</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <!-- Matrix rain canvas -->
+    <canvas id="matrix"></canvas>
+
+    <header>
+        <div class="logo glitch" data-text="HEXSTRIKE_AI">HEXSTRIKE_AI</div>
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="blink"></span>
+                <span>SYSTEM: ONLINE</span>
+            </div>
+            <div class="status-item" id="clock">CLOCK: 08:30:45</div>
+            <div class="status-item">NODE: RED_TEAM_ALPHA</div>
+            <button class="terminal-btn" onclick="openTerminal()">Open Terminal</button>
+        </div>
+    </header>
+
+    <div class="scroll-container">
+        <!-- SECTION 1: MAIN OPERATIONS -->
+        <section class="section">
+            <div class="grid-sec1">
+                <!-- Panel 1: Main GUI (VNC) -->
+                <div class="panel panel-vnc">
+                    <div class="panel-header">
+                        <span>Pentest GUI // Desktop</span>
+                        <span>ID: GUI-01</span>
+                    </div>
+                    <div class="panel-content">
+                        <iframe src="http://localhost:6080/vnc.html"></iframe>
+                    </div>
+                    <div class="scanline"></div>
+                </div>
+
+                <!-- Panel 2: File System -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span>Data Bridge // Files</span>
+                        <span>ID: DATA-01</span>
+                    </div>
+                    <div class="panel-content">
+                        <iframe src="http://localhost:8081"></iframe>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: COMMAND & MONITORING -->
+        <section class="section">
+            <div class="grid-sec2">
+                <!-- Terminals Row -->
+                <div class="terminals-row">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span>Secure Terminal A // TTYD</span>
+                            <span>ID: TERM-01</span>
+                        </div>
+                        <div class="panel-content">
+                            <iframe src="http://localhost:7681"></iframe>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span>Secure Terminal B // TTYD</span>
+                            <span>ID: TERM-02</span>
+                        </div>
+                        <div class="panel-content">
+                            <iframe src="http://localhost:7681"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Stats Row -->
+                <div class="monitor-row">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span>System Resource Monitor // DOCKER_STATS</span>
+                            <span>ID: CTRL-01</span>
+                        </div>
+                        <div class="panel-content">
+                            <!-- Main Aggregate Cards with nested lists -->
+                            <div class="stats-monitor">
+                                <div class="stat-card">
+                                    <span class="stat-label">AGGREGATE CPU</span>
+                                    <div class="stat-value" id="cpu-val">0%</div>
+                                    <div class="stat-bar"><div class="stat-level" id="cpu-bar" style="width: 0%;"></div></div>
+                                    <div class="mini-list" id="cpu-list">
+                                        <!-- CPU-specific node stats go here -->
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-label">MEMORY USAGE</span>
+                                    <div class="stat-value" id="mem-val">0 / 0 GB</div>
+                                    <div class="stat-bar"><div class="stat-level" id="mem-bar" style="width: 0%;"></div></div>
+                                    <div class="mini-list" id="mem-list">
+                                        <!-- Memory-specific node stats go here -->
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-label">NET RX (IN)</span>
+                                    <div class="stat-value" id="disk-val">0 MB</div>
+                                    <div class="stat-bar"><div class="stat-level" id="disk-bar" style="width: 0%;"></div></div>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-label">NET TX (OUT)</span>
+                                    <div class="stat-value" id="net-val">0 MB</div>
+                                    <div class="stat-bar"><div class="stat-level" id="net-bar" style="width: 0%;"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // --- Matrix Digital Rain ---
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピ';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let x = 0; x < columns; x++) drops[x] = 1;
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ff3131'; 
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 35);
+
+        // --- Real Docker Stats Fetching ---
+        async function updateStats() {
+            try {
+                const response = await fetch('http://localhost:8082/stats');
+                const data = await response.json();
+                
+                // 1. Update Aggregate Cards
+                document.getElementById('cpu-val').innerText = data.aggregate.cpu + '%';
+                document.getElementById('cpu-bar').style.width = Math.min(data.aggregate.cpu, 100) + '%';
+                
+                document.getElementById('mem-val').innerText = `${data.aggregate.mem_usage}GB / ${data.aggregate.mem_limit}GB`;
+                document.getElementById('mem-bar').style.width = data.aggregate.mem_percent + '%';
+                
+                document.getElementById('disk-val').innerText = data.aggregate.net_in_mb + ' MB';
+                document.getElementById('disk-bar').style.width = Math.min(data.aggregate.net_in_mb / 10, 100) + '%';
+                
+                document.getElementById('net-val').innerText = data.aggregate.net_out_mb + ' MB';
+                document.getElementById('net-bar').style.width = Math.min(data.aggregate.net_out_mb / 10, 100) + '%';
+
+                // 2. Update CPU Card Individual List
+                document.getElementById('cpu-list').innerHTML = data.individual.map(node => `
+                    <div class="mini-node-row">
+                        <span class="mini-node-name">${node.name}</span>
+                        <span class="mini-node-val">${node.cpu}%</span>
+                    </div>
+                `).join('');
+
+                // 3. Update Memory Card Individual List
+                document.getElementById('mem-list').innerHTML = data.individual.map(node => `
+                    <div class="mini-node-row">
+                        <span class="mini-node-name">${node.name}</span>
+                        <span class="mini-node-val">${node.mem}% (${node.mem_mb}MB)</span>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                console.error("Stats Fetch Error:", err);
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = 'CLOCK: ' + now.toTimeString().split(' ')[0];
+        }
+
+        function openTerminal() {
+            window.open('http://localhost:7681', 'PentestTerminal', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes');
+        }
+
+        setInterval(updateStats, 2000); // Fetch every 2s
+        setInterval(updateClock, 1000);
+        updateStats(); // Initial call
+
+        // --- Focus Fix for Terminal Iframes ---
+        // Ensures that clicking the terminal panel focuses the iframe for typing
+        document.querySelectorAll('.panel').forEach(panel => {
+            panel.addEventListener('mousedown', () => {
+                const iframe = panel.querySelector('iframe');
+                if (iframe) iframe.focus();
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

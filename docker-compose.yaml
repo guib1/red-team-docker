@@ -2,14 +2,18 @@ services:
   hexstrike-ai:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: pentest-lab/Dockerfile
+      args:
+        INSTALL_GUI: "${INSTALL_GUI:-false}"
     container_name: hexstrike_gemini_lab
     image: mvp-hex-ai:latest
     
     # Privilégios elevados para scans de rede (Nmap, etc)
     privileged: true
     
-    # Modo host permite alcançar as máquinas do TryHackMe via sua VPN local
+    # Host network: container sees the SAME network as your machine (VPN, WireGuard, etc.)
+    # ttyd is served by a separate sidecar container with its own port mapping.
+    # noVNC (port 6080) is also exposed directly via host network when GUI is installed.
     network_mode: host
     
     # Garante interatividade para o comando gemini-cli
@@ -22,10 +26,53 @@ services:
       
       # Persistência das configurações (API Keys, preferências do Gemini-CLI)
       # No Linux/Mac, o Gemini-CLI costuma salvar em ~/.config/
-      - ./config/gemini-cli:/root/.config/gemini-terminator
+      - ./pentest-lab/config/gemini-cli:/root/.config/gemini-terminator
 
     environment:
       - TERM=xterm-256color # Garante que as cores do terminal funcionem bem
       - GEMINI_API_KEY=${GEMINI_API_KEY:-} # Pode ser passada via arquivo .env
 
     working_dir: /root/pentest
+
+  # Web terminal sidecar: ttyd with port mapping, shells into hexstrike via docker exec
+  hexstrike-ttyd:
+    build: ./ttyd
+    container_name: hexstrike_ttyd
+    ports:
+      - "7681:7681"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - hexstrike-ai
+    restart: unless-stopped
+
+  files:
+    image: filebrowser/filebrowser
+    container_name: hexstrike_files
+    ports:
+      - "8081:80"
+    volumes:
+      - ./workdir:/srv
+    command: --noauth
+
+  # noVNC sidecar: bridge between Windows host and the host-networked lab
+  # Essential for Windows because 'network_mode: host' doesn't expose ports to localhost.
+  hexstrike-novnc:
+    build: ./novnc
+    container_name: hexstrike_novnc
+    ports:
+      - "6080:6080"
+    # Connects to the VNC server running in the 'hexstrike_gemini_lab' container (port 5901)
+    # Since hexstrike-ai is in host mode, we reach it via host.docker.internal.
+    entrypoint: ["websockify", "--web=/usr/share/novnc/", "6080", "172.18.0.1:5901"]
+    restart: unless-stopped
+
+  hexstrike-stats:
+    build: ./stats
+    container_name: hexstrike_stats
+    ports:
+      - "8082:8082"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
