@@ -149,6 +149,31 @@ header {
     font-size: 0.75rem;
     text-transform: uppercase;
     justify-content: space-between;
+    position: relative;
+}
+
+.panel-header .header-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.reload-btn {
+    cursor: pointer;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    transition: 0.3s;
+    user-select: none;
+    padding: 2px 5px;
+    border: 1px solid transparent;
+}
+
+.reload-btn:hover {
+    opacity: 1;
+    color: var(--accent);
+    text-shadow: 0 0 8px var(--accent);
+    border-color: var(--border-color);
+    background: rgba(255, 0, 0, 0.1);
 }
 
 .panel-content {
